@@ -9,17 +9,28 @@
 import UIKit
 
 class MainViewController: UIViewController {
-     
+    
+    private lazy var movies = [Movie]()
+    
     private let segmentedControl: UISegmentedControl = {
         let sc = UISegmentedControl(items: ["Popular", "Upcomming", "Top Rated"])
         sc.selectedSegmentIndex = 0
         sc.addTarget(self, action: #selector(handleSegmentChange), for: .valueChanged)
+        
         return sc
     }()
     
     private var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
+        
         return tableView
+    }()
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let spinner = UIActivityIndicatorView()
+        spinner.startAnimating()
+        spinner.isHidden = true
+        return spinner
     }()
     
     override func viewDidLoad() {
@@ -29,6 +40,9 @@ class MainViewController: UIViewController {
         tableView.delegate = self
         
         setupViews()
+        
+        self.activityIndicator.isHidden = false
+        fetchPopularMovies()
     }
     
     private func setupViews() {
@@ -51,17 +65,66 @@ class MainViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+        
+        self.view.addSubview(activityIndicator)
+        activityIndicator.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        activityIndicator.center = view.center
+        activityIndicator.isHidden = true
+    }
+    
+    private func startIndicator() {
+        self.activityIndicator.startAnimating()
+        self.activityIndicator.isHidden = false
+    }
+    
+    
+    private func endIndicator() {
+        self.activityIndicator.stopAnimating()
+        self.activityIndicator.isHidden = true
+    }
+    
+    
+    private func fetchPopularMovies() {
+        NetworkManager.getMovies(inCategory: .popular) { [weak self](movies) in
+            self?.endIndicator()
+            self?.movies = movies
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
+    private func fetchUpcomingMovies() {
+        NetworkManager.getMovies(inCategory: .upcoming) { [weak self] (movies) in
+            self?.endIndicator()
+            self?.movies = movies
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
+    private func fetchTopRatedMovies() {
+        NetworkManager.getMovies(inCategory: .topRated) { [weak self](movies) in
+            self?.endIndicator()
+            self?.movies = movies
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
     }
     
     @objc private func handleSegmentChange() {
         
+        startIndicator()
+        
         switch segmentedControl.selectedSegmentIndex {
         case 0:
-            print("PopularMovies")
+            fetchPopularMovies()
         case 1:
-            print("UpcomingMovies")
+            fetchUpcomingMovies()
         case 2:
-            print("TopRatedMovies")
+            fetchTopRatedMovies()
         default:
             break
         }
@@ -73,14 +136,12 @@ class MainViewController: UIViewController {
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        movies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
         let cell = UITableViewCell()
-        cell.textLabel?.text = "Movie\(indexPath.row)"
-        
+        cell.textLabel?.text = movies[indexPath.row].title
         return cell
     }
 }
