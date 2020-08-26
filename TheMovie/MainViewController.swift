@@ -9,7 +9,7 @@
 import UIKit
 
 class MainViewController: UIViewController {
-    
+     
     private let segmentedControl: UISegmentedControl = {
         let sc = UISegmentedControl(items: ["Popular", "Upcomming", "Top Rated"])
         sc.selectedSegmentIndex = 0
