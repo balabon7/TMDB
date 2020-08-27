@@ -28,13 +28,6 @@ class MainViewController: UIViewController {
         return tableView
     }()
     
-    private let activityIndicator: UIActivityIndicatorView = {
-        let spinner = UIActivityIndicatorView()
-        spinner.startAnimating()
-        spinner.isHidden = true
-        return spinner
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -42,8 +35,7 @@ class MainViewController: UIViewController {
         tableView.delegate = self
         
         setupViews()
-        
-        startIndicator()
+        showSpinner()
         fetchPopularMovies()
     }
     
@@ -71,58 +63,45 @@ class MainViewController: UIViewController {
             stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
-        
-        self.view.addSubview(activityIndicator)
-        activityIndicator.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        activityIndicator.center = view.center
-        activityIndicator.isHidden = true
     }
-    
-    private func startIndicator() {
-        self.activityIndicator.startAnimating()
-        self.activityIndicator.isHidden = false
-    }
-    
-    
-    private func endIndicator() {
-        self.activityIndicator.stopAnimating()
-        self.activityIndicator.isHidden = true
-    }
-    
     
     private func fetchPopularMovies() {
         NetworkManager.getMovies(inCategory: .popular) { [weak self](movies) in
-            //self?.endIndicator()
+
             self?.movies = movies
             DispatchQueue.main.async {
+            
                 self?.tableView.reloadData()
+                self?.removeSpinner()
             }
         }
     }
     
     private func fetchUpcomingMovies() {
         NetworkManager.getMovies(inCategory: .upcoming) { [weak self] (movies) in
-           // self?.endIndicator()
+       
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
+                 self?.removeSpinner()
             }
         }
     }
     
     private func fetchTopRatedMovies() {
         NetworkManager.getMovies(inCategory: .topRated) { [weak self](movies) in
-           // self?.endIndicator()
+
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
+                self?.removeSpinner()
             }
         }
     }
     
     @objc private func handleSegmentChange() {
         
-        startIndicator()
+       showSpinner()
         
         switch segmentedControl.selectedSegmentIndex {
         case 0:

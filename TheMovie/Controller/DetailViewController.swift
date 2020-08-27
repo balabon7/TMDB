@@ -69,20 +69,18 @@ class DetailViewController: UIViewController {
         return textView
     }()
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationController!.navigationBar.tintColor = .black
         setupViews()
-        
+        showSpinner()
         guard let id = selectedMovie else { return }
         self.fetchDetailMovie(id: id)
     }
     
-    
     private func setupViews() {
-        
+    
+        self.navigationController!.navigationBar.tintColor = .black
         view.addSubview(backdropImageView)
         view.addSubview(movieNameLabel)
         view.addSubview(genresLabel)
@@ -93,7 +91,7 @@ class DetailViewController: UIViewController {
     }
     
     private func fetchDetailMovie(id: Int) {
-        
+
         NetworkManager.getMovieInfo(forId: id) { [weak self] (movie) in
             
             self?.movie = movie
@@ -119,6 +117,8 @@ class DetailViewController: UIViewController {
             
             guard let backdropPath = movie.backdropPath else {return }
             self?.fetchDataImage(backdropPath: backdropPath)
+            
+            self?.removeSpinner()
         }
     }
     
@@ -127,7 +127,6 @@ class DetailViewController: UIViewController {
         let url = "https://image.tmdb.org/t/p/w500/\(backdropPath)"
         
         NetworkManager.downloadImage(url: url) { (image) in
-            
             DispatchQueue.main.async {
                 self.backdropImageView.image = image
             }
@@ -177,6 +176,5 @@ extension DetailViewController {
         overviewTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10).isActive = true
         overviewTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10).isActive = true
         overviewTextView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -12).isActive = true
-        
     }
 }
