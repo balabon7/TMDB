@@ -9,8 +9,9 @@
 import UIKit
 
 class MainViewController: UIViewController {
-    
-    private lazy var movies = [Movie]()
+
+    private lazy var movies = [Result]()
+    private var selectedId: Int?
     
     private let segmentedControl: UISegmentedControl = {
         let sc = UISegmentedControl(items: ["Popular", "Upcomming", "Top Rated"])
@@ -46,9 +47,13 @@ class MainViewController: UIViewController {
         fetchPopularMovies()
     }
     
-    private func setupViews() {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         navigationItem.title = "Movies"
+    }
+    
+    private func setupViews() {
         
         let indentedStackView = UIStackView(arrangedSubviews: [segmentedControl])
         indentedStackView.layoutMargins = .init(top: 12, left: 12, bottom: 12, right: 12)
@@ -87,7 +92,7 @@ class MainViewController: UIViewController {
     
     private func fetchPopularMovies() {
         NetworkManager.getMovies(inCategory: .popular) { [weak self](movies) in
-            self?.endIndicator()
+            //self?.endIndicator()
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -97,7 +102,7 @@ class MainViewController: UIViewController {
     
     private func fetchUpcomingMovies() {
         NetworkManager.getMovies(inCategory: .upcoming) { [weak self] (movies) in
-            self?.endIndicator()
+           // self?.endIndicator()
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -107,7 +112,7 @@ class MainViewController: UIViewController {
     
     private func fetchTopRatedMovies() {
         NetworkManager.getMovies(inCategory: .topRated) { [weak self](movies) in
-            self?.endIndicator()
+           // self?.endIndicator()
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -153,7 +158,7 @@ class MainViewController: UIViewController {
             guard let imageData = try? Data(contentsOf: imageUrl) else { return }
             
             DispatchQueue.main.async {
-                cell.posterImageView.image = UIImage(data: imageData)
+               cell.posterImageView.image = UIImage(data: imageData)
             }
         }
     }
@@ -173,5 +178,19 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         configureCell(cell: cell, for: indexPath)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        guard let id = movies[indexPath.row].id else { return }
+        self.selectedId = id
+        
+        if let detailVC = storyboard?.instantiateViewController(withIdentifier: "DetailedInfoVC") as? DetailViewController {
+        
+            detailVC.selectedMovie = selectedId
+            navigationController?.pushViewController(detailVC, animated: true)
+        }
     }
 }

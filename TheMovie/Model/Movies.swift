@@ -11,13 +11,13 @@ import Foundation
 // MARK: - Movies
 struct Movies: Decodable {
     let page, totalResults, totalPages: Int?
-    let results: [Movie]?
+    let results: [Result]?
     
     init?(json: [String: Any]) {
         let page = json["page"] as? Int
         let totalResults = json["total_results"] as? Int
         let totalPages = json["total_pages"] as? Int
-        let results = (json["results"] as? [[String: Any]])?.compactMap { Movie(json: $0) }
+        let results = (json["results"] as? [[String: Any]])?.compactMap { Result(json: $0) }
         
         self.page = page
         self.totalResults = totalResults
@@ -27,7 +27,7 @@ struct Movies: Decodable {
 }
 
 // MARK: - Result
-struct Movie: Decodable {
+struct Result: Decodable {
     let popularity: Double?
     let voteCount: Int?
     let video: Bool?

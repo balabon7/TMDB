@@ -43,12 +43,6 @@ class MainTableViewCell: UITableViewCell {
         return label
     }()
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-
-        posterImageView.image = nil
-    }
-    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
