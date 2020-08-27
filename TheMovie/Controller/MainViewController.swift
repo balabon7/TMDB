@@ -8,10 +8,18 @@
 
 import UIKit
 
-class MainViewController: UIViewController {
+fileprivate let cellIdentifier = "MainTableViewCell"
+fileprivate var category: MovieCategory = MovieCategory.popular
 
+class MainViewController: UIViewController {
+    
     private lazy var movies = [Result]()
     private var selectedId: Int?
+    private var page1: Int = 1
+    private var page2: Int?
+    private var page3: Int?
+    
+    var fetchingMore = false
     
     private let segmentedControl: UISegmentedControl = {
         let sc = UISegmentedControl(items: ["Popular", "Upcomming", "Top Rated"])
@@ -21,10 +29,11 @@ class MainViewController: UIViewController {
         return sc
     }()
     
-    private var tableView: UITableView = {
+    private let tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.rowHeight = 80
-        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: "MainTableViewCell")
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        
         return tableView
     }()
     
@@ -66,11 +75,10 @@ class MainViewController: UIViewController {
     }
     
     private func fetchPopularMovies() {
-        NetworkManager.getMovies(inCategory: .popular) { [weak self](movies) in
-
+        NetworkManager.getMovies(inCategory: .popular, pageStringNumber: page) { [weak self](movies) in
+            
             self?.movies = movies
             DispatchQueue.main.async {
-            
                 self?.tableView.reloadData()
                 self?.removeSpinner()
             }
@@ -78,19 +86,19 @@ class MainViewController: UIViewController {
     }
     
     private func fetchUpcomingMovies() {
-        NetworkManager.getMovies(inCategory: .upcoming) { [weak self] (movies) in
-       
+        NetworkManager.getMovies(inCategory: .upcoming, pageStringNumber: page) { [weak self] (movies) in
+            
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
-                 self?.removeSpinner()
+                self?.removeSpinner()
             }
         }
     }
     
     private func fetchTopRatedMovies() {
-        NetworkManager.getMovies(inCategory: .topRated) { [weak self](movies) in
-
+        NetworkManager.getMovies(inCategory: .topRated, pageStringNumber: page) { [weak self](movies) in
+            
             self?.movies = movies
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
@@ -101,19 +109,22 @@ class MainViewController: UIViewController {
     
     @objc private func handleSegmentChange() {
         
-       showSpinner()
+        showSpinner()
+        page = 1
         
         switch segmentedControl.selectedSegmentIndex {
         case 0:
+            category = MovieCategory.popular
             fetchPopularMovies()
         case 1:
+            category = MovieCategory.upcoming
             fetchUpcomingMovies()
         case 2:
+            category = MovieCategory.topRated
             fetchTopRatedMovies()
         default:
             break
         }
-        tableView.reloadData()
     }
     
     private func configureCell(cell: MainTableViewCell, for indexPath: IndexPath) {
@@ -129,20 +140,22 @@ class MainViewController: UIViewController {
             cell.ratingLabel.text = "Rating: \(voteAverage)"
         }
         
+        guard let path = movie.posterPath else { return }
+        
         DispatchQueue.global().async {
             
             let url = "https://image.tmdb.org/t/p/w500/"
-            guard let imageUrl = URL(string: url + movie.posterPath!) else { return }
+            guard let imageUrl = URL(string: url + path) else { return }
             guard let imageData = try? Data(contentsOf: imageUrl) else { return }
             
             DispatchQueue.main.async {
-               cell.posterImageView.image = UIImage(data: imageData)
+                cell.posterImageView.image = UIImage(data: imageData)
             }
         }
     }
-    
 }
 
+//MARK: - UITableView Protocols
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -151,7 +164,7 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MainTableViewCell", for: indexPath) as! MainTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! MainTableViewCell
         
         configureCell(cell: cell, for: indexPath)
         
@@ -166,9 +179,49 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
         self.selectedId = id
         
         if let detailVC = storyboard?.instantiateViewController(withIdentifier: "DetailedInfoVC") as? DetailViewController {
-        
+            
             detailVC.selectedMovie = selectedId
             navigationController?.pushViewController(detailVC, animated: true)
         }
+    }
+}
+
+//MARK: - Pagination TableView 
+extension MainViewController {
+    
+    func createSpinnerFooter() -> UIView {
+        
+        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: view.frame.size.width, height: 100))
+        let spinner = UIActivityIndicatorView(style: .large)
+        spinner.center = footerView.center
+        spinner.startAnimating()
+        footerView.addSubview(spinner)
+        
+        return footerView
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        
+        if offsetY > contentHeight - scrollView.frame.height {
+            self.tableView.tableFooterView = createSpinnerFooter()
+            if !fetchingMore {
+                beginBatchFetch()
+            }
+        }
+    }
+    
+    func beginBatchFetch() {
+        fetchingMore = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+            page += 1
+            NetworkManager.getMovies(inCategory: category, pageStringNumber: page) { (result) in
+                self.movies += result
+            }
+            self.tableView.tableFooterView = nil
+            self.fetchingMore = false
+            self.tableView.reloadData()
+        })
     }
 }

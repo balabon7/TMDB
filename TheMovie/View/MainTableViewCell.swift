@@ -21,8 +21,10 @@ class MainTableViewCell: UITableViewCell {
     
      lazy var movieNameLabel: UILabel = {
         let label = UILabel ()
-        label.font = UIFont.boldSystemFont(ofSize: 15)
-        label.adjustsFontSizeToFitWidth = true
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.numberOfLines = 0
+        label.lineBreakMode = .byTruncatingTail
+        label.minimumScaleFactor = 0.8
         
         return label
     }()
@@ -42,6 +44,11 @@ class MainTableViewCell: UITableViewCell {
         
         return label
     }()
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.posterImageView.image = UIImage(named: "placeholder")
+    }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -68,14 +75,14 @@ class MainTableViewCell: UITableViewCell {
         posterImageView.widthAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.6).isActive = true
         
         movieNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        movieNameLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 6).isActive = true
+        movieNameLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 0).isActive = true
         movieNameLabel.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 12).isActive = true
         movieNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12).isActive = true
-        movieNameLabel.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        movieNameLabel.heightAnchor.constraint(equalToConstant: 34).isActive = true
         
         
         releaseDateLabel.translatesAutoresizingMaskIntoConstraints = false
-        releaseDateLabel.topAnchor.constraint(equalTo: self.movieNameLabel.bottomAnchor, constant: 8).isActive = true
+        releaseDateLabel.topAnchor.constraint(equalTo: self.movieNameLabel.bottomAnchor, constant: 6).isActive = true
         releaseDateLabel.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 12).isActive = true
         releaseDateLabel.heightAnchor.constraint(equalToConstant: 16).isActive = true
         releaseDateLabel.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
@@ -85,7 +92,6 @@ class MainTableViewCell: UITableViewCell {
         ratingLabel.leadingAnchor.constraint(equalTo: posterImageView.trailingAnchor, constant: 12).isActive = true
         ratingLabel.heightAnchor.constraint(equalToConstant: 16).isActive = true
         ratingLabel.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-        
     }
     
 }

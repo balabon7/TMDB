@@ -11,7 +11,7 @@ import UIKit
 class DetailViewController: UIViewController {
     
     var selectedMovie: Int?
-    var movie: Movie?
+    private var movie: Movie?
     
     private let backdropImageView: UIImageView = {
         let image = UIImageView()
@@ -23,10 +23,12 @@ class DetailViewController: UIViewController {
     
     private let movieNameLabel: UILabel = {
         let label = UILabel ()
-        label.font = UIFont.boldSystemFont(ofSize: 22)
+        label.font = UIFont.boldSystemFont(ofSize: 20)
         label.textColor = .black
-        label.adjustsFontSizeToFitWidth = true
         label.textAlignment = .center
+        label.numberOfLines = 0
+        label.lineBreakMode = .byTruncatingTail
+        label.minimumScaleFactor = 0.8
         
         return label
     }()
@@ -79,7 +81,7 @@ class DetailViewController: UIViewController {
     }
     
     private func setupViews() {
-    
+        
         self.navigationController!.navigationBar.tintColor = .black
         view.addSubview(backdropImageView)
         view.addSubview(movieNameLabel)
@@ -91,21 +93,21 @@ class DetailViewController: UIViewController {
     }
     
     private func fetchDetailMovie(id: Int) {
-
+        
         NetworkManager.getMovieInfo(forId: id) { [weak self] (movie) in
             
             self?.movie = movie
             self?.movieNameLabel.text = movie.title
             self?.overviewTextView.text = movie.overview
             
-            if let genresOfFilm = movie.genres {
-                
-                var genres = String()
-                genresOfFilm.forEach { genres.append($0.name! + ", ") }
-                genres.removeLast()
-                genres.removeLast()
-                self?.genresLabel.text = "Ganres:  \(genres)"
-            }
+            guard let genresOfFilm = movie.genres else { return }
+            
+            var genres = [String]()
+            genresOfFilm.forEach { genres.append($0.name!) }
+            
+            let stringGenres = genres.joined(separator:", ")
+            self?.genresLabel.text = "Ganres:  \(stringGenres)"
+            
             
             if let releaseDate = movie.releaseDate {
                 self?.releaseDateLabel.text = "Release Date: \(releaseDate)"
@@ -124,9 +126,7 @@ class DetailViewController: UIViewController {
     
     private func fetchDataImage(backdropPath: String) {
         
-        let url = "https://image.tmdb.org/t/p/w500/\(backdropPath)"
-        
-        NetworkManager.downloadImage(url: url) { (image) in
+        NetworkManager.downloadImage(backdropPath: backdropPath) { (image) in
             DispatchQueue.main.async {
                 self.backdropImageView.image = image
             }
@@ -151,7 +151,7 @@ extension DetailViewController {
         movieNameLabel.topAnchor.constraint(equalTo: backdropImageView.bottomAnchor, constant: 8).isActive = true
         movieNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12).isActive = true
         movieNameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12).isActive = true
-        movieNameLabel.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        movieNameLabel.heightAnchor.constraint(equalToConstant: 54).isActive = true
         
         genresLabel.translatesAutoresizingMaskIntoConstraints = false
         genresLabel.topAnchor.constraint(equalTo: movieNameLabel.bottomAnchor).isActive = true
