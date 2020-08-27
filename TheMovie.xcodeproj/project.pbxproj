@@ -100,9 +100,9 @@
 		046F0F4924F6EF5500FBA058 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				046F0F4C24F6F0D200FBA058 /* MainTableViewCell.swift */,
 				046F0F2C24F6D4DA00FBA058 /* Main.storyboard */,
 				046F0F3124F6D4DE00FBA058 /* LaunchScreen.storyboard */,
+				046F0F4C24F6F0D200FBA058 /* MainTableViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";

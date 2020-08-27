@@ -38,6 +38,9 @@ struct Movie: Decodable {
     let originalTitle: String?
     let genreIDS: [Int]?
     let title: String?
+    let overview: String?
+    let releaseDate: String?
+    let voteAverage: Double?
     
     init?(json: [String: Any]) {
         let popularity = json["popularity"] as? Double
@@ -50,6 +53,9 @@ struct Movie: Decodable {
         let originalTitle = json["original_title"] as? String
         let genreIDS = json["genre_ids"] as? [Int]
         let title = json["title"] as? String
+        let overview = json["overview"] as? String
+        let releaseDate = json["release_date"] as? String
+        let voteAverage = json["vote_average"] as? Double
         
         self.popularity = popularity
         self.voteCount = voteCount
@@ -61,5 +67,8 @@ struct Movie: Decodable {
         self.originalTitle = originalTitle
         self.genreIDS = genreIDS
         self.title = title
+        self.overview = overview
+        self.releaseDate = releaseDate
+        self.voteAverage = voteAverage
     }
 }

@@ -22,7 +22,8 @@ class MainViewController: UIViewController {
     
     private var tableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
-        
+        tableView.rowHeight = 80
+        tableView.register(MainTableViewCell.self, forCellReuseIdentifier: "MainTableViewCell")
         return tableView
     }()
     
@@ -41,7 +42,7 @@ class MainViewController: UIViewController {
         
         setupViews()
         
-        self.activityIndicator.isHidden = false
+        startIndicator()
         fetchPopularMovies()
     }
     
@@ -131,6 +132,32 @@ class MainViewController: UIViewController {
         tableView.reloadData()
     }
     
+    private func configureCell(cell: MainTableViewCell, for indexPath: IndexPath) {
+        
+        let movie = movies[indexPath.row]
+        cell.movieNameLabel.text = movie.title
+        
+        
+        if let releaseDate = movie.releaseDate {
+            cell.releaseDateLabel.text = "Release Date: \(releaseDate)"
+        }
+        
+        if let voteAverage = movie.voteAverage {
+            cell.ratingLabel.text = "Rating: \(voteAverage)"
+        }
+        
+        DispatchQueue.global().async {
+            
+            let url = "https://image.tmdb.org/t/p/w500/"
+            guard let imageUrl = URL(string: url + movie.posterPath!) else { return }
+            guard let imageData = try? Data(contentsOf: imageUrl) else { return }
+            
+            DispatchQueue.main.async {
+                cell.posterImageView.image = UIImage(data: imageData)
+            }
+        }
+    }
+    
 }
 
 extension MainViewController: UITableViewDelegate, UITableViewDataSource {
@@ -140,8 +167,11 @@ extension MainViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = UITableViewCell()
-        cell.textLabel?.text = movies[indexPath.row].title
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MainTableViewCell", for: indexPath) as! MainTableViewCell
+        
+        configureCell(cell: cell, for: indexPath)
+        
         return cell
     }
 }
