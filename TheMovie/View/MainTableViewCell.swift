@@ -10,7 +10,7 @@ import UIKit
 
 class MainTableViewCell: UITableViewCell {
     
-    lazy var posterImageView: UIImageView = {
+     lazy var posterImageView: UIImageView = {
         let image = UIImageView()
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
@@ -19,7 +19,7 @@ class MainTableViewCell: UITableViewCell {
     }()
     
     
-    lazy var movieNameLabel: UILabel = {
+     lazy var movieNameLabel: UILabel = {
         let label = UILabel ()
         label.font = UIFont.boldSystemFont(ofSize: 15)
         label.adjustsFontSizeToFitWidth = true
@@ -35,7 +35,7 @@ class MainTableViewCell: UITableViewCell {
         return label
     }()
     
-    let ratingLabel: UILabel = {
+     lazy var ratingLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 12)
         label.textColor = .darkGray

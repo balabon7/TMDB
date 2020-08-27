@@ -26,6 +26,7 @@ struct Movie {
     let video: Bool?
     let voteAverage: Double?
     let voteCount: Int?
+    let genres: [Genres]?
     
     init?(json: [String: Any]) {
         let adult = json["adult"] as? Bool
@@ -49,6 +50,7 @@ struct Movie {
         let video = json["video"] as? Bool
         let voteAverage = json["vote_average"] as? Double
         let voteCount = json["vote_count"] as? Int
+        let genres = (json["genres"] as? [[String: Any]])?.compactMap { Genres(json: $0) }
         
         self.adult = adult
         self.backdropPath = backdropPath
@@ -71,5 +73,21 @@ struct Movie {
         self.video = video
         self.voteAverage = voteAverage
         self.voteCount = voteCount
+        self.genres = genres
+    }
+}
+
+// MARK: - Result
+struct Genres {
+    
+    let id: Int?
+    let name: String?
+    
+    init?(json: [String: Any]) {
+        let id = json["id"] as? Int
+        let name = json["name"] as? String
+        
+        self.id = id
+        self.name = name
     }
 }

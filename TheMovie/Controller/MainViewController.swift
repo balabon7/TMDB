@@ -28,7 +28,7 @@ class MainViewController: UIViewController {
         return tableView
     }()
     
-    let activityIndicator: UIActivityIndicatorView = {
+    private let activityIndicator: UIActivityIndicatorView = {
         let spinner = UIActivityIndicatorView()
         spinner.startAnimating()
         spinner.isHidden = true
@@ -141,7 +141,6 @@ class MainViewController: UIViewController {
         
         let movie = movies[indexPath.row]
         cell.movieNameLabel.text = movie.title
-        
         
         if let releaseDate = movie.releaseDate {
             cell.releaseDateLabel.text = "Release Date: \(releaseDate)"
